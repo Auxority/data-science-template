@@ -1,0 +1,7 @@
+# Virtual python environment
+venv
+# The data directory
+data/*
+!data/readme.md
+# Python module cache
+modules/__pycache__/
