@@ -1,24 +1,27 @@
-import subprocess
-import sys
+import os
+import chardet
+import pandas as pd
 
-def install_dependencies():
-    print('Installing pip dependencies...')
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'chardet', 'pandas', 'numpy', 'matplotlib', '--quiet'])
-    print('Finished installing pip dependencies...')
+def read_csv(file_name: str, fallback_encoding: str = 'utf-8'):
+    path = os.path.join('../data', file_name)
+    data, encoding = None, None
 
-def read_csv(file_name: str, file_encoding: str = None):
-    import chardet
-    import pandas as pd
+    try:
+        with open(path, 'rb') as f:
+            data = f.read(1000)
+    except FileNotFoundError:
+        print(f'File not found: {path}')
+        return None    
 
-    path = f'../data/{file_name}'
+    try:
+        encoding_result = chardet.detect(data)
+        encoding = encoding_result['encoding']
+        confidence = encoding_result['confidence']
+        print(f'Found encoding: {encoding} ({confidence * 100:.2f}% certainty)')
+        if (confidence < 0.7):
+            raise LookupError
+    except LookupError:
+        print(f'Failed to detect encoding. Using fallback encoding {fallback_encoding}...')
+        encoding = fallback_encoding
 
-    with open(path, 'rb') as f:
-        data = f.read(1000)
-
-    if (not file_encoding):
-        print('Detecting encoding...')
-        result = chardet.detect(data)
-        file_encoding = result['encoding']
-        print(f'Found encoding: {file_encoding} ({result["confidence"] * 100:.2f}% certainty)')
-
-    return pd.read_csv(path, encoding=file_encoding)
+    return pd.read_csv(path, encoding=encoding)
