@@ -2,8 +2,8 @@ import os
 import chardet
 import pandas as pd
 
-def read_csv(file_name: str, fallback_encoding: str = 'utf-8'):
-    path = os.path.join('../data', file_name)
+def find_encoding(file_name: str, fallback_encoding: str = 'utf-8'):
+    path = os.path.abspath(os.path.join('../data', file_name))
     data, encoding = None, None
 
     try:
@@ -24,4 +24,4 @@ def read_csv(file_name: str, fallback_encoding: str = 'utf-8'):
         print(f'Failed to detect encoding. Using fallback encoding {fallback_encoding}...')
         encoding = fallback_encoding
 
-    return pd.read_csv(path, encoding=encoding)
+    return encoding
