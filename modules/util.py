@@ -32,7 +32,7 @@ def find_encoding(file_name: str, fallback_encoding: str = 'utf-8') -> str:
 
     return encoding
 
-def explore(df: pd.DataFrame, dv: DataVisualizer = None):
+def explore(df: pd.DataFrame, dv: DataVisualizer = None) -> None:
     if dv is None:
         dv = DataVisualizer()
 
