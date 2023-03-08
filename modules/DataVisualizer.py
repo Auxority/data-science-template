@@ -19,7 +19,7 @@ class DataVisualizer:
     def visualize(self, df: DataFrame) -> None:
         self._visualize_distributions(df, 'number', 'Distribution of {}')
         self._visualize_distributions(df, 'object', 'Counts of {}')
-        self._visualize_date_distributions(df)
+        self._visualize_distributions(df, 'datetime64', 'Distribution of {}')
         self._visualize_correlations(df)
 
     def _visualize_distributions(self, df: DataFrame, column_type: str, title_format: str) -> None:
@@ -46,7 +46,7 @@ class DataVisualizer:
             row_index, column_index = divmod(i, self.plots_per_row)
             axe = axes[column_index] if number_of_rows == 1 else axes[row_index, column_index]
 
-            if column_type == 'number':
+            if column_type in ['number', 'datetime64']:
                 sns.histplot(x=col, data=df, ax=axe)
             else:
                 sns.countplot(x=col, data=df, ax=axe)
@@ -63,19 +63,6 @@ class DataVisualizer:
 
         plt.tight_layout()
         plt.show()
-    
-    def _visualize_date_distributions(self, df: DataFrame) -> None:
-        target_columns = df.select_dtypes(include=['datetime64']).columns
-
-        for i, col in enumerate(target_columns):
-            if i >= self.max_plots:
-                print(f'Too many columns to plot. Showing the first {self.max_plots} plots.')
-                break
-
-            plt.figure(figsize=(self.figure_size, self.figure_size))
-            sns.histplot(x=col, data=df)
-            plt.show()
-
     
     def _visualize_correlations(self, df: DataFrame) -> None:
         numeric_df = df.select_dtypes(include=['number'])
