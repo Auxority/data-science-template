@@ -1,8 +1,10 @@
 import os
 import chardet
 import pandas as pd
+from DataVisualizer import *
+from DataExplorer import *
 
-def find_encoding(file_name: str, fallback_encoding: str = 'utf-8'):
+def find_encoding(file_name: str, fallback_encoding: str = 'utf-8') -> str:
     path = os.path.abspath(os.path.join('../data', file_name))
     data, encoding = None, None
 
@@ -11,7 +13,11 @@ def find_encoding(file_name: str, fallback_encoding: str = 'utf-8'):
             data = f.read(1000)
     except FileNotFoundError:
         print(f'File not found: {path}')
-        return None    
+        return fallback_encoding
+
+    if not data:
+        print(f'File is empty: {path}')
+        return fallback_encoding
 
     try:
         encoding_result = chardet.detect(data)
@@ -25,3 +31,10 @@ def find_encoding(file_name: str, fallback_encoding: str = 'utf-8'):
         encoding = fallback_encoding
 
     return encoding
+
+def explore(df: pd.DataFrame, dv: DataVisualizer = None):
+    if dv is None:
+        dv = DataVisualizer()
+
+    explorer = DataExplorer(dv)
+    explorer.explore(df)
