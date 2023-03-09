@@ -29,6 +29,10 @@ class DataVisualizer:
     def _visualize_distributions(self, df: DataFrame, column_type: str) -> None:
         target_columns = df.select_dtypes(include=[column_type]).columns
         number_of_plots = len(target_columns)
+        
+        if number_of_plots == 0:
+            return None
+
         number_of_rows = int(np.ceil(number_of_plots / self.plots_per_row))
         figure_width, figure_height = self._calculate_figure_size(number_of_rows)
         figure, ax = self._create_subplots(number_of_rows, figure_width, figure_height)
@@ -72,17 +76,10 @@ class DataVisualizer:
         figure_width = np.multiply(self.figure_size, self.plots_per_row)
         figure_height = np.multiply(self.figure_size, number_of_rows)
         return figure_width, figure_height
-
-    def _create_histogram(self, df: DataFrame, col: str, ax: axes, column_type: str) -> None:
-        sns.histplot(x=col, data=df, ax=ax)
+    
+    def _create_box_plot(self, df: DataFrame, col: str, ax: axes) -> None:
+        sns.boxplot(x=col, data=df, ax=ax)
         ax.set_title(f'Distribution of {col}')
-        min_max_difference = df[col].max() - df[col].min() if column_type == 'number' else df[col].max().timestamp() - df[col].min().timestamp()
-        if min_max_difference > 1000:
-            ax.set_yscale('log')
-
-        is_skewed = df[col].skew() > 1 or df[col].skew() < -1 if column_type == 'number' else False
-        if is_skewed:
-            ax.set_xscale('log')
     
     def _create_bar_plot(self, df: DataFrame, col: str, ax: axes, figure: plt.figure) -> None:
         unique_labels = df[col].unique()
@@ -128,7 +125,7 @@ class DataVisualizer:
             current_ax = ax[position_in_row] if number_of_rows == 1 else ax[row_index, position_in_row]
 
             if column_type == 'number' or column_type == 'datetime64':
-                self._create_histogram(df=df, col=col, ax=current_ax, column_type=column_type)
+                self._create_box_plot(df=df, col=col, ax=current_ax)
             else:
                 self._create_bar_plot(df=df, col=col, ax=current_ax, figure=figure)
 
