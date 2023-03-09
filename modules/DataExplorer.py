@@ -23,14 +23,18 @@ class DataExplorer:
     def show_missing(self, df: pd.DataFrame) -> None:
         missing_values = df.isnull().sum()
         if missing_values.sum() > 0:
-            print(f'There are {missing_values.sum()} missing values in the dataset.\n')
+            message = 'There are {} missing values in the dataset.\n' if missing_values.sum() > 1 else 'There is {} missing value in the dataset.\n'
+            print(message.format(missing_values.sum()))
             display(missing_values.to_frame().rename(columns={0: 'count'}))
         else:
             print('There are no missing values in the dataset.\n')
     
     def show_duplicate(self, df: pd.DataFrame) -> None:
-        if df.duplicated().sum() > 0:
-            print(f'There are {df.duplicated().sum()} duplicate rows in the dataset.\n')
+        duplicated = df.duplicated()
+        if duplicated.sum() > 0:
+            message = 'There are {} duplicate rows in the dataset.\n' if duplicated.sum() > 1 else 'There is {} duplicate row in the dataset.\n'
+            print(message.format(duplicated.sum()))
+            display(df[duplicated])
         else:
             print('There are no duplicate rows in the dataset.\n')
     
