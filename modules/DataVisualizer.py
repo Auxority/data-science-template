@@ -124,9 +124,9 @@ class DataVisualizer:
             row_index, position_in_row = divmod(i, self.plots_per_row)
             current_ax = ax[position_in_row] if number_of_rows == 1 else ax[row_index, position_in_row]
 
-            if column_type == 'number' or column_type == 'datetime64':
+            if column_type == 'number':
                 self._create_box_plot(df=df, col=col, ax=current_ax)
-            else:
+            elif column_type == 'object':
                 self._create_bar_plot(df=df, col=col, ax=current_ax, figure=figure)
 
     def _create_subplots(
