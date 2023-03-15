@@ -42,9 +42,9 @@ class DataVisualizer:
             col=target_columns,
             ax=ax,
             column_type=column_type,
-            figure=figure,
             target_columns=target_columns,
             number_of_rows=number_of_rows,
+            figure=figure,
         )
 
         self._remove_empty_plots(
@@ -81,40 +81,31 @@ class DataVisualizer:
         sns.boxplot(x=col, data=df, ax=ax)
         ax.set_title(f'Distribution of {col}')
     
-    def _create_bar_plot(self, df: DataFrame, col: str, ax: axes, figure: plt.figure) -> None:
-        unique_labels = df[col].unique()
-        value_counts = df[col].value_counts()
-
-        x_values = unique_labels
-        y_values = value_counts.values
-
-        if len(unique_labels) > self.max_unique_labels:
-            top_values = value_counts.head(self.max_unique_labels)
-            x_values = top_values.index.values
-            y_values = top_values.values
+    def _create_bar_plot(self, df: DataFrame, col: str, ax: axes) -> None:
+        col_counts = df[col].value_counts()
+        if len(col_counts) > self.max_unique_labels:
             ax.set_title(f'Top {self.max_unique_labels} {col}')
-            if top_values.max() - top_values.min() > 1000:
-                ax.set_yscale('log')
+            top10_col_counts = col_counts.nlargest(10)
+            sns.barplot(x=top10_col_counts.values, y=top10_col_counts.index, ax=ax)
+            if top10_col_counts.max() - top10_col_counts.min() > 10000:
+                ax.set_xscale('log')
         else:
             ax.set_title(f'Distribution of {col}')
-            if value_counts.max() - value_counts.min() > 1000:
-                ax.set_yscale('log')
+            sns.barplot(x=col_counts.values, y=col_counts.index, ax=ax)
 
-        if any([len(str(x)) > 4 for x in x_values]):
-            ax.tick_params(axis='x', rotation=90, labelsize=8)
-            figure.set_figheight(figure.get_figheight() + 1)
+            if col_counts.max() - col_counts.min() > 10000:
+                ax.set_xscale('log')
+        ax.set_xlabel('Count')
 
-        sns.barplot(x=x_values, y=y_values, ax=ax)
-    
     def _create_plots(
             self,
             df: DataFrame,
             col: str,
             ax: axes,
             column_type: str,
-            figure: plt.figure,
             target_columns: list,
-            number_of_rows: int
+            number_of_rows: int,
+            figure: plt.figure,
         ) -> None:
         for i, col in enumerate(target_columns):
             if i >= self.max_plots:
@@ -127,7 +118,8 @@ class DataVisualizer:
             if column_type == 'number':
                 self._create_box_plot(df=df, col=col, ax=current_ax)
             elif column_type == 'object':
-                self._create_bar_plot(df=df, col=col, ax=current_ax, figure=figure)
+                figure.set_figwidth(self.figure_size * 4)
+                self._create_bar_plot(df=df, col=col, ax=current_ax)
 
     def _create_subplots(
             self,
