@@ -58,7 +58,7 @@ class DataVisualizer:
         plt.show()
     
     def _visualize_correlations(self, df: DataFrame) -> None:
-        numeric_df = df.select_dtypes(include=['number', 'datetime64'])
+        numeric_df = df.select_dtypes(include=['number'])
         if len(numeric_df) < 2:
             return None
 
@@ -120,6 +120,15 @@ class DataVisualizer:
             elif column_type == 'object':
                 figure.set_figwidth(self.figure_size * 4)
                 self._create_bar_plot(df=df, col=col, ax=current_ax)
+            elif column_type == 'datetime64':
+                self._create_line_plot(df=df, col=col, ax=current_ax)
+
+    def _create_line_plot(self, df: DataFrame, col: str, ax: axes) -> None:
+        df[col] = df[col].dt.date
+        df[col].value_counts().sort_index().plot.line(ax=ax)
+        ax.set_title(f'Distribution of {col}')
+        ax.set_xlabel(col)
+        ax.set_ylabel('Count')
 
     def _create_subplots(
             self,
